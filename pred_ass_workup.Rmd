@@ -1,0 +1,69 @@
+---
+title: "Prediction Assignment Writeup"
+author: "Usama Fouad"
+date: "2/15/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Intro
+The goal of your project is to predict the manner in which they did the exercise. This is the "classe" variable in the training set. You may use any of the other variables to predict with. You should create a report describing how you built your model, how you used cross validation, what you think the expected out of sample error is, and why you made the choices you did. You will also use your prediction model to predict 20 different test cases.
+
+
+## Loading Libraries
+
+```{r cache=TRUE}
+library(lattice)
+library(ggplot2)
+library(caret)
+library(rpart.plot)
+library(readr)
+```
+
+
+## Download the dataset
+
+```{r cache=TRUE}
+#setwd("/home/usama/Desktop")
+#train_url ="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+#test_url ="https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+#download.file(train_url,destfile="training_data.csv")
+#download.file(test_url,destfile="testing_data.csv")
+```
+  
+```{r cache=TRUE}
+train <- read.csv("/home/usama/Desktop/training_data.csv", na.strings = c("NA", "#DIV/0!", ""))
+test <- read.csv("/home/usama/Desktop/testing_data.csv", na.strings = c("NA", "#DIV/0!", ""))
+```
+
+## Cleaning
+```{r cache=TRUE}
+train <- train[, colSums(is.na(train)) == 0]
+test <- test[, colSums(is.na(test)) == 0]
+
+# Delete variables that are not related 
+train <- train[, -c(1:7)]
+test <- test[, -c(1:7)]
+
+# partioning the training set into two different dataset
+
+traningPartitionData <- createDataPartition(train$classe,  p = 0.7, list = F)
+trainingDataSet <- train[traningPartitionData, ]
+testingDataSet <- train[-traningPartitionData, ]
+```
+
+
+
+
+## D.T
+```{r}
+decisionTreeModel <- rpart(classe ~ ., data = trainingDataSet, method = "class")
+decisionTreePrediction <- predict(decisionTreeModel, testingDataSet, type = "class")
+
+# Plot Decision Tree
+rpart.plot(decisionTreeModel, main = "Decision Tree", under = T, faclen = 0)
+```
+
